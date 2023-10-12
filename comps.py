@@ -1,148 +1,65 @@
 """
 Team composition used by the bot
-Comps come from https://tftactics.gg/tierlist/team-comps
 Items are in camel case and a-Z
+Strategies:
+    Default: This comp uses the standard leveling strategy that revolves around a 4-cost carry.
+    Fast 8: This comp looks to level up to 8 aggressively with a strong economy.
+    Slow Roll: This comp rolls gold above 50 to look for 3-star champions.
 """
+import set_9_5.comps.arcane_domain_jayce_vi_silco as arcane_domain
+import set_9_5.comps.heart_of_the_cards_twisted_fate_illaoi_nilah_miss_fortune as heart_of_the_cards
+import set_9_5.comps.roll_the_rogues_ekko_qiyana_katarina as roll_the_rogues
+import set_9_5.comps.walk_the_plank_nilah_miss_fortune_gangplank_nautilus as walk_the_plank
+import set_9_5.comps.super_nash_bros_kaisa_chogath_belveth as super_nash_bros
+import set_9_5.comps.milio_cr7_shen_taric_ryze as milio_cr7
+import set_9_5.comps.bastion_barrage_aphelios_shen_silco as bastion_barrage
+import set_9_5.comps.bruiser_bites_malzahar_chogath_reksai as bruiser_bites
+import set_9_5.comps.noxus_rolls_samira_swain_mordekaiser_naafiri as noxus_rolls
+import random
 
-COMP = {
-    "Xayah": {
-        "board_position": 6,
-        "items": ["GuinsoosRageblade","Guardbreaker","LastWhisper"],
-        "level": 3,
-        "final_comp": True
-    },
-    "Nilah": {
-        "board_position": 18,
-        "items": ["Bloodthirster","RapidFirecannon","Deathblade"],
-        "level": 3,
-        "final_comp": True
-    },
-    "Shen": {
-        "board_position": 26,
-        "items": ["SunfireCape","WarmogsArmor","GargoyleStoneplate"],
-        "level": 2,
-        "final_comp": True
-    },
-    "Sejuani": {
-        "board_position": 27,
-        "items": [],
-        "level": 2,
-        "final_comp": True
-    },
-    "Neeko": {
-        "board_position": 24,
-        "items": [],
-        "level": 2,
-        "final_comp": True
-    },
-    "Ashe": {
-        "board_position": 4,
-        "items": [],
-        "level": 2,
-        "final_comp": True
-    },
-    "Jhin": {
-        "board_position": 5,
-        "items": [],
-        "level": 2,
-        "final_comp": True
-    },
-    "Milio": {
-        "board_position": 0,
-        "items": [],
-        "level": 2,
-        "final_comp": True
-    },
-    "Irelia": {
-        "board_position": 25,
-        "items": ["SunfireCape","WarmogsArmor","GargoyleStoneplate"],
-        "level": 2,
-        "final_comp": False
-    },
-    "Jinx":{
-        "board_position": 1,
-        "items": ["GuinsoosRageblade","Guardbreaker","LastWhisper"],
-        "level": 2,
-        "final_comp": False
-    },
-    "Sett":{
-        "board_position": 23,
-        "items": ["GargoyleStoneplate","WarmogsArmor","SunfireCape"],
-        "level": 2,
-        "final_comp": False
-    },
-    "Warwick":{
-        "board_position": 17,
-        "items": [],
-        "level": 2,
-        "final_comp": False
-    }
-}
-
-# No logic for certain augments meaning the bot won't know what to do if they are included in here
-# (Anything that changes gameplay or adds something to the bench).
-AUGMENTS: list[str] = [
-    "Gotta Go Fast",
-    "Tiny Power",
-    "Shurima's Legacy",
-    "Featherweights",
-    "Reconnaissance Team",
-    "Electrocharge",
-    "Quickdraw Soul",
-    "InfiniTeam",
-    "Big Friend",
-    "First Aid Kit",
-    "Stand United",
-    "Urf's Grab Bag",
-    "Component Grab Bag",
-    "Thrill of the Hunt",
-    "Better Together",
-    "Cybernetic Uplink",
-    "Cybernetic Implants",
-    "Celestial Blessing",
-    "Cybernetic Shell",
-    "Weakspot",
-    "Tri Force",
-    "Gadget Expert",
-    "Metabolic Accelerator",
-    "Second Wind",
-    "Luden's Echo",
-    "Last Stand",
-    "Ascension",
-    "Tiny Titans",
-    "Sunfire Board",
-    "Wise Spending",
-    "Component Grab Bag+",
-    "Preparation",
-    "Blue Battery",
-    "Hustler",
-    "Windfall++",
-    "Verdant Veil",
-    "Rich Get Richer+",
-    "Combat Training",
-    "Meditation",
-    "Axiom Arc",
-]
+COMPS_TO_SELECT_RANDOMLY_FROM: list = [bruiser_bites, noxus_rolls]
 
 
-def champions_to_buy() -> list:
-    """Creates a list of champions to buy during the game"""
-    champs_to_buy: list = []
-    for champion, champion_data in COMP.items():
-        if champion_data["level"] == 1:
-            champs_to_buy.append(champion)
-        elif champion_data["level"] == 2:
-            champs_to_buy.extend([champion] * 3)
-        elif champion_data["level"] == 3:
-            champs_to_buy.extend([champion] * 9)
-        else:
-            raise ValueError("Comps.py | Champion level must be a valid level (1-3)")
-    return champs_to_buy
+def return_random_comp():
+    return random.choice(COMPS_TO_SELECT_RANDOMLY_FROM)
 
 
-def get_unknown_slots() -> list:
-    """Creates a list of slots on the board that don't have a champion from the team composition"""
-    container: list = []
-    for _, champion_data in COMP.items():
-        container.append(champion_data["board_position"])
-    return [n for n in range(27) if n not in container]
+class Comp:
+
+    def __init__(self, composition):
+        # The name we have given the comp.
+        self.name: str = composition.NAME
+        # Do we play Normal? Do we go Fast 8? Do we Slow Roll?
+        self.strategy: str = composition.STRATEGY
+        # How difficult it is to obtain all the units and items.
+        self.difficulty_to_play: str = composition.DIFFICULTY
+        # The traits that are being used when the final version of the comp is in play.
+        self.active_final_comp_traits: list = composition.ACTIVE_FINAL_COMP_TRAITS
+        # The traits that are inactive when the final version of the comp is in play.
+        self.inactive_final_comp_traits: list = composition.INACTIVE_FINAL_COMP_TRAITS
+        # The legend that was recommended by whatever website the comp is from.
+        self.recommended_legend: str = composition.RECOMMENDED_LEGEND
+        self.comp: dict = composition.COMP
+        self.primary_augments: list = composition.PRIMARY_AUGMENTS
+        self.secondary_augments: list = composition.SECONDARY_AUGMENTS
+
+    def champions_to_buy(self) -> list[str]:
+        """Creates a list of champions to buy during the game"""
+        champs_to_buy: list[str] = []
+        for champion, champion_data in self.comp.items():
+            if champion_data["level"] == 1:
+                champs_to_buy.append(champion)
+            elif champion_data["level"] == 2:
+                champs_to_buy.extend([champion] * 3)
+            elif champion_data["level"] == 3:
+                champs_to_buy.extend([champion] * 9)
+            else:
+                raise ValueError("Comps.py | Champion level must be a valid level (1-3)")
+        return champs_to_buy
+
+    def get_unknown_slots(self) -> list:
+        """Creates a list of slots on the board that don't have a champion from the team composition"""
+        container: list = []
+        for _, champion_data in self.comp.items():
+            container.append(champion_data["board_position"])
+        return [n for n in range(27) if n not in container]
